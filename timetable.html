@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USL's Even Sem Time Table</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1a5d1a;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #2e7d32, #81c784);
+            border-radius: 2px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            margin-top: 20px;
+            table-layout: fixed;
+        }
+
+        th, td {
+            padding: 15px 10px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+            word-wrap: break-word;
+            overflow: hidden;
+        }
+
+        th {
+            background: linear-gradient(45deg, #2e7d32, #388e3c);
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f5f9f5;
+        }
+
+        tr:hover {
+            background-color: #e8f5e9;
+        }
+
+        td {
+            font-size: 0.9em;
+        }
+
+        .time-slot {
+            font-weight: bold;
+            background: linear-gradient(45deg, #66bb6a, #81c784);
+            color: white;
+        }
+
+        .room-info {
+            font-size: 0.8em;
+            color: #666;
+            display: block;
+            margin-top: 5px;
+            padding: 3px;
+            border-top: 1px dashed #ddd;
+        }
+
+        td:empty, td:contains("-") {
+            background: repeating-linear-gradient(
+                45deg,
+                #f5f5f5,
+                #f5f5f5 10px,
+                #fafafa 10px,
+                #fafafa 20px
+            );
+        }
+
+        @media (max-width: 1200px) {
+            body {
+                margin: 10px;
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 10px;
+            }
+            
+            th, td {
+                padding: 8px 5px;
+                font-size: 0.8em;
+            }
+            
+            .room-info {
+                font-size: 0.7em;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                margin: 5px;
+                padding: 0.5rem;
+            }
+
+            h1 {
+                font-size: 1.4em;
+            }
+
+            th, td {
+                padding: 6px 3px;
+                font-size: 0.65em;
+            }
+
+            .room-info {
+                font-size: 0.6em;
+            }
+        }
+
+        @media print {
+            body {
+                background: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            table {
+                box-shadow: none;
+            }
+        }
+
+        /* Update calendar styles */
+        .calendar-container {
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        .calendar-header button {
+            background: #0078d4;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-size: 14px;
+        }
+
+        .calendar-header button:hover {
+            background: #106ebe;
+        }
+
+        .calendar-header h3 {
+            margin: 0;
+            font-size: 1.4em;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .weekday-header {
+            font-weight: 600;
+            color: #666;
+            text-align: center;
+            padding: 10px 5px;
+            font-size: 0.9em;
+        }
+
+        .calendar-date {
+            text-align: center;
+            padding: 12px 5px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95em;
+            color: #333;
+        }
+
+        .calendar-date:hover {
+            background-color: #f3f2f1;
+        }
+
+        .calendar-date.current {
+            background-color: #0078d4;
+            color: white;
+            border: 2px solid #0078d4;
+            font-weight: bold;
+        }
+
+        .calendar-date.has-class {
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-container {
+                width: 95%;
+                padding: 15px;
+            }
+
+            .calendar-date {
+                width: 35px;
+                height: 35px;
+                font-size: 0.9em;
+            }
+        }
+
+        /* Add styles for class boxes */
+        .class-boxes {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .class-box {
+            flex: 1;
+            max-width: 400px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #present-class {
+            background: linear-gradient(135deg, #4CAF50, #81C784);
+        }
+
+        #next-class {
+            background: linear-gradient(135deg, #2196F3, #64B5F6);
+        }
+
+        .class-box h2 {
+            color: white;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .class-box .class-info {
+            font-size: 1.1em;
+            color: white;
+        }
+
+        .class-box .room-info {
+            margin-top: 5px;
+            display: inline-block;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        @media (max-width: 768px) {
+            .class-boxes {
+                flex-direction: column;
+            }
+            .class-box {
+                max-width: 100%;
+            }
+            .class-box h2 {
+                font-size: 1em;
+            }
+            .class-box .class-info {
+                font-size: 0.9em;
+            }
+        }
+
+        /* Current Date Time Box styles */
+        .current-datetime {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .current-datetime .time {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2e7d32;
+            margin: 10px 0;
+        }
+
+        .current-datetime .date {
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        /* Layout for boxes */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .side-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .side-content {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>USL's Even Sem Time Table</h1>
+        
+        <div class="main-content">
+            <div class="table-container">
+                <table>
+                    <tr>
+                        <th>Day/Period</th>
+                        <th>1</th>
+                        <th>2</th>
+                        <th>3</th>
+                        <th>4</th>
+                        <th>5</th>
+                        <th>6</th>
+                        <th>7</th>
+                        <th>8</th>
+                        <th>9</th>
+                        <th>10</th>
+                        <th>11</th>
+                        <th>12</th>
+                        <th>13</th>
+                        <th>14</th>
+                    </tr>
+                    <tr>
+                        <td class="time-slot">Mon</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>23SDCS12A-P<br><span class="room-info">S-3-RoomNo-C019</span></td>
+                        <td>23SDCS12A-P<br><span class="room-info">S-3-RoomNo-C019</span></td>
+                        <td>23CS2205A-L<br><span class="room-info">S-13-RoomNo-C208</span></td>
+                        <td>23CS2205A-L<br><span class="room-info">S-13-RoomNo-C208</span></td>
+                        <td>-</td>
+                        <td>23AD2001O-L<br><span class="room-info">S-11-RoomNo-M101</span></td>
+                        <td>23AD2102R-L<br><span class="room-info">S-15-RoomNo-M129</span></td>
+                        <td>23MT2014-T<br><span class="room-info">S-14-RoomNo-C411</span></td>
+                        <td>23MT2014-T<br><span class="room-info">S-14-RoomNo-C411</span></td>
+                        <td>-</td>
+                        <td>CRTCODL2V2-S<br><span class="room-info">S-18-RoomNo-C625</span></td>
+                        <td>CRTCODL2V2-S<br><span class="room-info">S-18-RoomNo-C625</span></td>
+                    </tr>
+                    <tr>
+                        <td class="time-slot">Tue</td>
+                        <td>23CS05EF-P<br><span class="room-info">S-11-RoomNo-C018</span></td>
+                        <td>23CS05EF-P<br><span class="room-info">S-11-RoomNo-C018</span></td>
+                        <td>23MT2014-L<br><span class="room-info">S-14-RoomNo-C411</span></td>
+                        <td>23MT2014-L<br><span class="room-info">S-14-RoomNo-C411</span></td>
+                        <td>23SDCS12A-S<br><span class="room-info">S-3-RoomNo-C107</span></td>
+                        <td>23SDCS12A-S<br><span class="room-info">S-3-RoomNo-C107</span></td>
+                        <td>-</td>
+                        <td>23CC3010-S<br><span class="room-info">S-18-RoomNo-C211</span></td>
+                        <td>23CC3010-S<br><span class="room-info">S-18-RoomNo-C211</span></td>
+                        <td>23CS2205A-P<br><span class="room-info">S-13-RoomNo-C318A</span></td>
+                        <td>23CS2205A-P<br><span class="room-info">S-13-RoomNo-C318A</span></td>
+                        <td>-</td>
+                        <td>CRTCODL2V2-S<br><span class="room-info">S-18-RoomNo-C625</span></td>
+                        <td>CRTCODL2V2-S<br><span class="room-info">S-18-RoomNo-C625</span></td>
+                    </tr>
+                    <tr>
+                        <td class="time-slot">Wed</td>
+                        <td>23CS05EF-S<br><span class="room-info">S-11-RoomNo-C211</span></td>
+                        <td>23CS05EF-S<br><span class="room-info">S-11-RoomNo-C211</span></td>
+                        <td>23AD2102R-P<br><span class="room-info">S-15-RoomNo-C017</span></td>
+                        <td>23AD2102R-P<br><span class="room-info">S-15-RoomNo-C017</span></td>
+                        <td>23AD2001O-P<br><span class="room-info">S-11-RoomNo-C017</span></td>
+                        <td>23AD2001O-P<br><span class="room-info">S-11-RoomNo-C017</span></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>23CS2205A-L<br><span class="room-info">S-13-RoomNo-C208</span></td>
+                        <td>23SP2104-S<br><span class="room-info">S-11-RoomNo-CRICKET NETS</span></td>
+                        <td>23SP2104-S<br><span class="room-info">S-11-RoomNo-CRICKET NETS</span></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td class="time-slot">Thu</td>
+                        <td>23CS05EF-S<br><span class="room-info">S-11-RoomNo-C321B2</span></td>
+                        <td>23CS05EF-S<br><span class="room-info">S-11-RoomNo-C321B2</span></td>
+                        <td>23SDCS12A-S<br><span class="room-info">S-3-RoomNo-M306</span></td>
+                        <td>23SDCS12A-S<br><span class="room-info">S-3-RoomNo-M306</span></td>
+                        <td>23CS2205A-S<br><span class="room-info">S-13-RoomNo-M121</span></td>
+                        <td>23CS2205A-S<br><span class="room-info">S-13-RoomNo-M121</span></td>
+                        <td>-</td>
+                        <td>23CC3010-S<br><span class="room-info">S-18-RoomNo-C211</span></td>
+                        <td>23CC3010-S<br><span class="room-info">S-18-RoomNo-C211</span></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>CRTCODL2V2-S<br><span class="room-info">S-18-RoomNo-C625</span></td>
+                        <td>CRTCODL2V2-S<br><span class="room-info">S-18-RoomNo-C625</span></td>
+                    </tr>
+                    <tr>
+                        <td class="time-slot">Sat</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>23AD2001O-L<br><span class="room-info">S-11-RoomNo-C208</span></td>
+                        <td>23AD2001O-L<br><span class="room-info">S-11-RoomNo-C208</span></td>
+                        <td>23AD2102R-L<br><span class="room-info">S-15-RoomNo-C210</span></td>
+                        <td>23AD2102R-L<br><span class="room-info">S-15-RoomNo-C210</span></td>
+                        <td>-</td>
+                        <td>23CS2205A-S<br><span class="room-info">S-13-RoomNo-C207</span></td>
+                        <td>23CS2205A-S<br><span class="room-info">S-13-RoomNo-C207</span></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="side-content">
+                <div class="current-datetime">
+                    <div class="time" id="currentTime">21:10</div>
+                    <div class="date" id="currentDate">Monday, January 20, 2025</div>
+                </div>
+                
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button onclick="prevMonth()">&lt;</button>
+                        <h3 id="currentMonth">January 2025</h3>
+                        <button onclick="nextMonth()">&gt;</button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="weekday-header">Sun</div>
+                        <div class="weekday-header">Mon</div>
+                        <div class="weekday-header">Tue</div>
+                        <div class="weekday-header">Wed</div>
+                        <div class="weekday-header">Thu</div>
+                        <div class="weekday-header">Fri</div>
+                        <div class="weekday-header">Sat</div>
+                    </div>
+                    <div id="calendar-dates" class="calendar-grid">
+                        <!-- Calendar dates will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="class-boxes">
+                    <div class="class-box" id="present-class">
+                        <h2>Present Class</h2>
+                        <div class="class-info">Loading...</div>
+                    </div>
+                    <div class="class-box" id="next-class">
+                        <h2>Next Class</h2>
+                        <div class="class-info">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Set to January 20, 2025
+        let currentDate = new Date(2025, 0, 20);
+        let displayedMonth = currentDate.getMonth();
+        let displayedYear = currentDate.getFullYear();
+
+        function updateCalendar() {
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+            
+            document.getElementById('currentMonth').textContent = 
+                `${monthNames[displayedMonth]} ${displayedYear}`;
+
+            const firstDay = new Date(displayedYear, displayedMonth, 1);
+            const lastDay = new Date(displayedYear, displayedMonth + 1, 0);
+            const datesGrid = document.getElementById('calendar-dates');
+            datesGrid.innerHTML = '';
+
+            // Add empty cells for days before the first of the month to align dates correctly
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'calendar-date';
+                emptyCell.style.visibility = 'hidden';
+                datesGrid.appendChild(emptyCell);
+            }
+
+            // Add the dates
+            for (let date = 1; date <= lastDay.getDate(); date++) {
+                const dateCell = document.createElement('div');
+                dateCell.className = 'calendar-date';
+                
+                // Mark current date (January 20, 2025)
+                if (date === 20 && 
+                    displayedMonth === 0 && 
+                    displayedYear === 2025) {
+                    dateCell.classList.add('current');
+                }
+                
+                dateCell.textContent = date;
+                datesGrid.appendChild(dateCell);
+            }
+        }
+
+        function prevMonth() {
+            displayedMonth--;
+            if (displayedMonth < 0) {
+                displayedMonth = 11;
+                displayedYear--;
+            }
+            updateCalendar();
+        }
+
+        function nextMonth() {
+            displayedMonth++;
+            if (displayedMonth > 11) {
+                displayedMonth = 0;
+                displayedYear++;
+            }
+            updateCalendar();
+        }
+
+        // Initialize calendar
+        updateCalendar();
+
+        // Function to get time period based on current time
+        function getCurrentPeriod() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const time = hours * 60 + minutes;
+
+            const periods = [
+                { start: 9 * 60 + 30, end: 10 * 60 + 20, period: 1 },
+                { start: 10 * 60 + 20, end: 11 * 60 + 10, period: 2 },
+                { start: 11 * 60 + 10, end: 12 * 60, period: 3 },
+                { start: 12 * 60, end: 12 * 60 + 50, period: 4 },
+                { start: 12 * 60 + 50, end: 13 * 60 + 40, period: 5 },
+                { start: 13 * 60 + 40, end: 14 * 60 + 30, period: 6 },
+                { start: 14 * 60 + 30, end: 15 * 60 + 20, period: 7 },
+                { start: 15 * 60 + 20, end: 16 * 60 + 10, period: 8 }
+            ];
+
+            for (let i = 0; i < periods.length; i++) {
+                if (time >= periods[i].start && time < periods[i].end) {
+                    return {
+                        current: i + 1,
+                        next: i + 2 <= periods.length ? i + 2 : null
+                    };
+                }
+            }
+
+            // Before first period
+            if (time < periods[0].start) {
+                return { current: null, next: 1 };
+            }
+            // After last period
+            return { current: null, next: null };
+        }
+
+        // Function to get current day
+        function getCurrentDay() {
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const now = new Date();
+            return days[now.getDay()];
+        }
+
+        // Function to update class boxes
+        function updateClassBoxes() {
+            const presentClassBox = document.querySelector('#present-class .class-info');
+            const nextClassBox = document.querySelector('#next-class .class-info');
+            const currentDay = getCurrentDay();
+            const { current, next } = getCurrentPeriod();
+
+            // Get class information from timetable
+            const table = document.querySelector('table');
+            const rows = Array.from(table.querySelectorAll('tr'));
+            const dayRow = rows.find(row => row.querySelector('.time-slot')?.textContent.trim() === currentDay);
+
+            if (!dayRow) {
+                presentClassBox.textContent = 'No classes today';
+                nextClassBox.textContent = 'No classes today';
+                return;
+            }
+
+            const cells = Array.from(dayRow.querySelectorAll('td'));
+
+            function getClassInfo(period) {
+                if (!period || period > cells.length - 1) return 'Study Time';
+                const cell = cells[period];
+                const classText = cell.innerHTML.replace(/<br>/g, ' - ');
+                return cell.textContent.trim() === '-' ? 'Study Time' : classText;
+            }
+
+            presentClassBox.innerHTML = current ? getClassInfo(current) : 'Study Time';
+            nextClassBox.innerHTML = next ? getClassInfo(next) : 'Study Time';
+        }
+
+        // Update class boxes every minute
+        updateClassBoxes();
+        setInterval(updateClassBoxes, 60000);
+
+        // Function to update current time and date
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Update time in 12-hour format
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // convert 0 to 12
+            document.getElementById('currentTime').textContent = `${hours}:${minutes} ${ampm}`;
+            
+            // Update date
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Update date and time every second
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+    </script>
+</body>
+</html>
